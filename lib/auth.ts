@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
 import { getDb, saveDb } from "@/lib/db";
 import type { User } from "@/lib/types";
+import { normalizeEmail, validateEmail } from "@/lib/email";
 
 const COOKIE = "ricox_session";
 const SECRET = process.env.AUTH_SECRET || "ricox-local-auth-secret";
@@ -91,7 +92,9 @@ export async function createUser(input: {
   referrerEmail?: string;
 }) {
   const db = await getDb();
-  const email = input.email.trim().toLowerCase();
+  const email = normalizeEmail(input.email);
+  const emailError = validateEmail(email);
+  if (emailError) throw new Error(emailError);
   if (db.users.some((u) => u.email === email)) {
     throw new Error("An account with this email already exists");
   }

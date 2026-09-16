@@ -4,6 +4,7 @@ import { FormEvent, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/components/AuthProvider";
+import { validateEmail } from "@/lib/email";
 
 export function RegisterForm() {
   const router = useRouter();
@@ -12,15 +13,22 @@ export function RegisterForm() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const [emailError, setEmailError] = useState("");
+
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError("");
+    setEmailError("");
     const form = new FormData(e.currentTarget);
     const name = String(form.get("name") || "");
     const email = String(form.get("email") || "");
     const password = String(form.get("password") || "");
     if (name.length < 2) return setError("Name must be at least 2 characters.");
-    if (!email.includes("@")) return setError("Please enter a valid email address.");
+    const invalidEmail = validateEmail(email);
+    if (invalidEmail) {
+      setEmailError(invalidEmail);
+      return setError(invalidEmail);
+    }
     if (password.length < 8) return setError("Password must be at least 8 characters.");
     setLoading(true);
     const res = await fetch("/api/auth/register", {
@@ -69,8 +77,16 @@ export function RegisterForm() {
           type="email"
           required
           placeholder="john@example.com"
-          className="h-10 w-full rounded-xl border border-line bg-void px-3 text-white"
+          autoComplete="email"
+          onBlur={(e) => setEmailError(validateEmail(e.target.value) || "")}
+          onChange={() => {
+            if (emailError) setEmailError("");
+          }}
+          className={`h-10 w-full rounded-xl border bg-void px-3 text-white ${
+            emailError ? "border-red" : "border-line"
+          }`}
         />
+        {emailError ? <p className="mt-1 text-xs text-red">{emailError}</p> : null}
       </div>
       <div>
         <label className="mb-1 block text-sm text-muted" htmlFor="password">

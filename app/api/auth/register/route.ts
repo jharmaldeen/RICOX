@@ -1,5 +1,6 @@
 import { createUser, setSession, publicUser } from "@/lib/auth";
 import { json } from "@/lib/api";
+import { validateEmail } from "@/lib/email";
 
 export async function POST(request: Request) {
   try {
@@ -8,7 +9,8 @@ export async function POST(request: Request) {
     const email = String(body.email || "").trim();
     const password = String(body.password || "");
     if (name.length < 2) return json({ error: "Name must be at least 2 characters." }, 400);
-    if (!email.includes("@")) return json({ error: "Please enter a valid email address." }, 400);
+    const emailError = validateEmail(email);
+    if (emailError) return json({ error: emailError }, 400);
     if (password.length < 8) return json({ error: "Password must be at least 8 characters." }, 400);
     const user = await createUser({
       name,
