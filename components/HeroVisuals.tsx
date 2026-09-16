@@ -68,7 +68,7 @@ export function HeroVisuals() {
           >
             <div className="absolute inset-[18px] flex items-center justify-center rounded-full bg-surface text-center">
               <div>
-                <p className="text-sm font-bold text-white">88%</p>
+                <p className="text-sm font-bold text-white">88.02</p>
                 <p className="text-[9px] text-muted">deployed</p>
               </div>
             </div>

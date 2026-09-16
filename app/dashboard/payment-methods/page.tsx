@@ -10,7 +10,7 @@ export default function PaymentMethodsPage() {
   const [error, setError] = useState("");
 
   function load() {
-    fetch("/api/payment-methods")
+    fetch("/api/payment-methods", { cache: "no-store" })
       .then((r) => r.json())
       .then((d) => setMethods(d.methods || []));
   }
@@ -34,8 +34,8 @@ export default function PaymentMethodsPage() {
     });
     const data = await res.json();
     if (!res.ok) return setError(data.error || "Could not save method");
+    if (data.method) setMethods((prev) => [...prev, data.method]);
     e.currentTarget.reset();
-    load();
   }
 
   return (

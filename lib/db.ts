@@ -19,6 +19,21 @@ const emptyDb = (): Database => ({
   passwordResets: [],
 });
 
+async function ensureAdmin(db: Database): Promise<boolean> {
+  if (db.users.some((user) => user.role === "admin" || user.email === "admin@ricox.com")) return false;
+  db.users.push({
+    id: "admin-user",
+    name: "RICOX Admin",
+    email: "admin@ricox.com",
+    passwordHash: await bcrypt.hash("RicoxAdmin1", 10),
+    role: "admin",
+    referralCode: "ADMIN001",
+    balance: 0,
+    createdAt: "2026-01-12T10:00:00.000Z",
+  });
+  return true;
+}
+
 async function seed(db: Database): Promise<Database> {
   if (db.users.length) return db;
   const passwordHash = await bcrypt.hash("RicoxDemo1", 10);
@@ -126,14 +141,15 @@ async function seed(db: Database): Promise<Database> {
 }
 
 export async function getDb(): Promise<Database> {
-  if (memory) return memory;
-  try {
-    const raw = await fs.readFile(DB_PATH, "utf8");
-    memory = await seed(JSON.parse(raw) as Database);
-  } catch {
-    memory = await seed(emptyDb());
-    await saveDb(memory);
+  if (!memory) {
+    try {
+      const raw = await fs.readFile(DB_PATH, "utf8");
+      memory = await seed(JSON.parse(raw) as Database);
+    } catch {
+      memory = await seed(emptyDb());
+    }
   }
+  if (await ensureAdmin(memory)) await saveDb(memory);
   return memory;
 }
 

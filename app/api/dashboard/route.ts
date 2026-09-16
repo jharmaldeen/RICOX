@@ -11,7 +11,6 @@ export async function GET() {
   const transactions = db.transactions.filter((t) => t.userId === user.id);
   const invested = investments.reduce((sum, i) => sum + i.amount, 0);
   const returns = transactions.filter((t) => t.type === "return").reduce((sum, tx) => sum + tx.amount, 0);
-  const withdrawals = transactions.filter((t) => t.type === "withdrawal");
   const sorted = [...transactions].sort((a, b) => a.createdAt.localeCompare(b.createdAt));
   let running = 0;
   const sparkline = [0];
@@ -43,8 +42,6 @@ export async function GET() {
     user: safeUser(user),
     invested,
     returns,
-    activeInvestments: investments.filter((i) => i.status === "active").length,
-    withdrawalCount: withdrawals.length,
     investments: enriched,
     recent: [...transactions].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 8),
     sparkline,

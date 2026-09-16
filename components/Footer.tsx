@@ -18,26 +18,24 @@ export function Footer() {
               projects, trade digital assets, and build a diversified portfolio with ease.
             </p>
             <div className="flex space-x-4">
-              <a className="hover:text-accent-2" href="#">
-                <span className="sr-only">Facebook</span>
-                <Facebook className="h-5 w-5" />
-              </a>
-              <a className="hover:text-accent-2" href="#">
-                <span className="sr-only">Twitter</span>
-                <Twitter className="h-5 w-5" />
-              </a>
-              <a className="hover:text-accent-2" href="#">
-                <span className="sr-only">Instagram</span>
-                <Instagram className="h-5 w-5" />
-              </a>
-              <a className="hover:text-accent-2" href="#">
-                <span className="sr-only">LinkedIn</span>
-                <Linkedin className="h-5 w-5" />
-              </a>
-              <a className="hover:text-accent-2" href="#">
-                <span className="sr-only">GitHub</span>
-                <Github className="h-5 w-5" />
-              </a>
+              {[
+                { href: "https://www.facebook.com/ricox", label: "Facebook", Icon: Facebook },
+                { href: "https://x.com/ricox", label: "Twitter", Icon: Twitter },
+                { href: "https://www.instagram.com/ricox", label: "Instagram", Icon: Instagram },
+                { href: "https://www.linkedin.com/company/ricox", label: "LinkedIn", Icon: Linkedin },
+                { href: "https://github.com/ricox", label: "GitHub", Icon: Github },
+              ].map(({ href, label, Icon }) => (
+                <a
+                  key={label}
+                  className="hover:text-accent-2"
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <span className="sr-only">{label}</span>
+                  <Icon className="h-5 w-5" />
+                </a>
+              ))}
             </div>
           </div>
           <div>

@@ -10,7 +10,7 @@ type Row = { id: string; dealName: string; amount: number; status: string };
 export default function PortfolioPage() {
   const [items, setItems] = useState<Row[]>([]);
   useEffect(() => {
-    fetch("/api/investments")
+    fetch("/api/investments", { cache: "no-store" })
       .then((r) => r.json())
       .then((d) => setItems(d.investments || []));
   }, []);

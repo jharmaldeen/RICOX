@@ -71,9 +71,6 @@ export function LoginForm() {
       <button type="submit" disabled={loading} className="btn-glow h-10 w-full rounded-full text-sm font-semibold text-white">
         {loading ? "Signing in..." : "Sign in"}
       </button>
-      <p className="text-center text-sm text-muted">
-        Demo: demo@ricox.com / RicoxDemo1
-      </p>
     </form>
   );
 }

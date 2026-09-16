@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Menu, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 
 const links = [
@@ -15,11 +15,33 @@ const links = [
 
 export function Header() {
   const pathname = usePathname();
+  const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const { user, logout } = useAuth();
 
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 12);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [pathname]);
+
+  async function signOut() {
+    setOpen(false);
+    await logout();
+    router.push("/auth/login");
+    router.refresh();
+  }
+
   return (
-    <header className="sticky top-0 z-50 border-b border-line bg-void/80 backdrop-blur-xl">
+    <header
+      className={`sticky top-0 z-50 transition-colors duration-300 ${
+        scrolled || open
+          ? "border-b border-line bg-void/90 backdrop-blur-xl"
+          : "border-b border-transparent bg-transparent"
+      }`}
+    >
       <nav className="container mx-auto flex items-center p-4 lg:px-8" aria-label="Global">
         <div className="flex flex-1 items-center justify-start">
           <Link href="/" className="-m-1.5 p-1.5" onClick={() => setOpen(false)}>
@@ -58,7 +80,7 @@ export function Header() {
                 </Link>
                 <button
                   type="button"
-                  onClick={() => logout()}
+                  onClick={signOut}
                   className="text-sm font-semibold text-muted hover:text-accent-2"
                 >
                   Sign out
@@ -118,10 +140,7 @@ export function Header() {
                 </Link>
                 <button
                   type="button"
-                  onClick={() => {
-                    setOpen(false);
-                    logout();
-                  }}
+                  onClick={signOut}
                   className="px-2 py-2 text-left text-sm font-semibold"
                 >
                   Sign out

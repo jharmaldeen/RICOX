@@ -31,14 +31,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   async function refresh() {
-    const res = await fetch("/api/auth/me");
+    const res = await fetch("/api/auth/me", { cache: "no-store" });
     const data = await res.json();
     setUser(data.user ?? null);
     setLoading(false);
   }
 
   async function logout() {
-    await fetch("/api/auth/logout", { method: "POST" });
+    await fetch("/api/auth/logout", { method: "POST", cache: "no-store" });
     setUser(null);
   }
 

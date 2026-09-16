@@ -56,7 +56,13 @@ export async function setSession(userId: string) {
 
 export async function clearSession() {
   const store = await cookies();
-  store.delete(COOKIE);
+  store.set(COOKIE, "", {
+    httpOnly: true,
+    sameSite: "lax",
+    path: "/",
+    maxAge: 0,
+    expires: new Date(0),
+  });
 }
 
 export async function getSessionUser(): Promise<User | null> {

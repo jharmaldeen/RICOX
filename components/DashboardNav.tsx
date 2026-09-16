@@ -93,6 +93,7 @@ export function DashboardNav({ open, onClose }: { open: boolean; onClose: () => 
               onClose();
               await logout();
               router.push("/auth/login");
+              router.refresh();
             }}
             className="flex h-10 w-10 items-center justify-center rounded-xl text-muted hover:bg-surface-2 hover:text-white"
           >

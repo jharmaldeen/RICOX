@@ -2,6 +2,8 @@ import { json, requireUser } from "@/lib/api";
 import { getDb, saveDb } from "@/lib/db";
 import { newId } from "@/lib/auth";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   const auth = await requireUser();
   if (!auth.user) return auth.response;

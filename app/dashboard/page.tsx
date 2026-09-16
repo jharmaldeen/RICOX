@@ -33,8 +33,6 @@ type DashboardData = {
   user: { name: string; balance: number; referralCode: string; profileImage?: string };
   invested: number;
   returns: number;
-  activeInvestments: number;
-  withdrawalCount: number;
   investments: Investment[];
   recent: Tx[];
   sparkline: number[];
@@ -75,7 +73,7 @@ export default function DashboardPage() {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    fetch("/api/dashboard")
+    fetch("/api/dashboard", { cache: "no-store" })
       .then((r) => r.json())
       .then(setData);
     fetch("/api/prices")
@@ -133,7 +131,7 @@ export default function DashboardPage() {
       <div className="grid gap-4 lg:grid-cols-12">
         <div className="space-y-4 lg:col-span-8">
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <div className="dash-panel rounded-2xl p-4">
+            <div className="dash-panel rounded-2xl p-4 sm:col-span-2">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <h2 className="text-xl font-semibold text-white">{firstName}</h2>
@@ -153,17 +151,6 @@ export default function DashboardPage() {
                   <Copy className="h-3 w-3" />
                   {copied ? "Copied" : "Copy link"}
                 </button>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3 sm:col-span-1">
-              <div className="dash-panel flex flex-col justify-center rounded-2xl p-4">
-                <p className="text-2xl font-semibold text-white">{data.activeInvestments}</p>
-                <p className="mt-1 text-xs text-muted">Active deals</p>
-              </div>
-              <div className="dash-panel flex flex-col justify-center rounded-2xl p-4">
-                <p className="text-2xl font-semibold text-white">{data.withdrawalCount}</p>
-                <p className="mt-1 text-xs text-muted">Withdrawals</p>
               </div>
             </div>
 

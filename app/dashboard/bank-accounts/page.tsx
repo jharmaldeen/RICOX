@@ -10,7 +10,7 @@ export default function BankAccountsPage() {
   const [error, setError] = useState("");
 
   function load() {
-    fetch("/api/bank-accounts")
+    fetch("/api/bank-accounts", { cache: "no-store" })
       .then((r) => r.json())
       .then((d) => setAccounts(d.accounts || []));
   }
@@ -34,8 +34,8 @@ export default function BankAccountsPage() {
     });
     const data = await res.json();
     if (!res.ok) return setError(data.error || "Could not save account");
+    if (data.account) setAccounts((prev) => [...prev, data.account]);
     e.currentTarget.reset();
-    load();
   }
 
   return (

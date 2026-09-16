@@ -9,7 +9,7 @@ type Tx = { id: string; type: string; amount: number; status: string; method?: s
 export default function TransactionsPage() {
   const [items, setItems] = useState<Tx[]>([]);
   useEffect(() => {
-    fetch("/api/transactions")
+    fetch("/api/transactions", { cache: "no-store" })
       .then((r) => r.json())
       .then((d) => setItems(d.transactions || []));
   }, []);
