@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bell, ChevronDown, Home, Menu } from "lucide-react";
+import { Bell, ChevronDown, Home, Menu, PanelLeft } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 
 const titles: Record<string, string> = {
@@ -24,7 +24,15 @@ const titles: Record<string, string> = {
   "/dashboard/admin/settings": "BTC wallet",
 };
 
-export function DashboardTopBar({ onMenu }: { onMenu: () => void }) {
+export function DashboardTopBar({
+  onMenu,
+  onToggleSidebar,
+  collapsed,
+}: {
+  onMenu: () => void;
+  onToggleSidebar: () => void;
+  collapsed: boolean;
+}) {
   const pathname = usePathname();
   const { user } = useAuth();
   const page = titles[pathname] || "Dashboard";
@@ -37,8 +45,18 @@ export function DashboardTopBar({ onMenu }: { onMenu: () => void }) {
           type="button"
           className="rounded-lg p-2 text-muted hover:bg-surface-2 hover:text-white lg:hidden"
           onClick={onMenu}
+          aria-label="Open menu"
         >
           <Menu className="h-5 w-5" />
+        </button>
+        <button
+          type="button"
+          className="hidden rounded-lg p-2 text-muted hover:bg-surface-2 hover:text-white lg:inline-flex"
+          onClick={onToggleSidebar}
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          <PanelLeft className="h-4 w-4" />
         </button>
         <Link href={homeHref} className="hidden rounded-lg p-2 text-muted hover:text-white sm:inline-flex">
           <Home className="h-4 w-4" />

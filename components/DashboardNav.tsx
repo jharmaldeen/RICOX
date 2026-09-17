@@ -41,12 +41,46 @@ const adminItems = [
   { href: "/dashboard/admin/settings", label: "BTC wallet", icon: Settings },
 ];
 
-export function DashboardNav({ open, onClose }: { open: boolean; onClose: () => void }) {
+const MIN = 72;
+const MAX = 280;
+
+export function DashboardNav({
+  open,
+  width,
+  onClose,
+  onResize,
+  onToggle,
+}: {
+  open: boolean;
+  width: number;
+  onClose: () => void;
+  onResize: (width: number) => void;
+  onToggle: () => void;
+}) {
   const pathname = usePathname();
   const router = useRouter();
   const { logout, user } = useAuth();
   const isAdmin = user?.role === "admin";
   const navItems = isAdmin ? adminItems : userItems;
+  const showLabels = width > 140;
+
+  function startDrag(event: React.PointerEvent<HTMLButtonElement>) {
+    event.preventDefault();
+    const startX = event.clientX;
+    const startWidth = width;
+    const target = event.currentTarget;
+    target.setPointerCapture(event.pointerId);
+
+    function onMove(move: PointerEvent) {
+      onResize(Math.min(MAX, Math.max(MIN, startWidth + (move.clientX - startX))));
+    }
+    function onUp() {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+    }
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+  }
 
   return (
     <>
@@ -59,22 +93,35 @@ export function DashboardNav({ open, onClose }: { open: boolean; onClose: () => 
         />
       ) : null}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-[72px] flex-col items-center border-r border-line bg-navy py-5 transition-transform lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-60 flex-col border-r border-line bg-navy py-5 transition-transform max-lg:px-3 lg:w-[var(--sbw)] lg:translate-x-0 ${
           open ? "translate-x-0" : "-translate-x-full"
-        }`}
+        } ${showLabels ? "items-stretch px-3" : "lg:items-center lg:px-2"}`}
       >
-        <Link href={isAdmin ? "/dashboard/admin" : "/"} className="mb-8 flex h-10 w-10 items-center justify-center" onClick={onClose}>
-          <img alt="RICOX" src="/images/logo.png" className="h-8 w-8" />
-        </Link>
-        <button type="button" className="absolute right-2 top-4 text-muted lg:hidden" onClick={onClose}>
-          <X className="h-4 w-4" />
-        </button>
+        <div className={`mb-6 flex items-center ${showLabels ? "justify-between px-1" : "justify-center max-lg:justify-between max-lg:px-1"}`}>
+          <Link
+            href={isAdmin ? "/dashboard/admin" : "/"}
+            className="flex items-center gap-2"
+            onClick={onClose}
+          >
+            <img alt="RICOX" src="/images/logo.png" className="h-8 w-8" />
+            <span className={`text-sm font-bold text-gradient ${showLabels ? "inline" : "hidden"} max-lg:inline`}>RICOX</span>
+          </Link>
+          <button type="button" className="text-muted lg:hidden" onClick={onClose} aria-label="Close sidebar">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
         {isAdmin ? (
-          <div className="mb-3 flex h-8 w-8 items-center justify-center rounded-lg bg-accent/20 text-accent-2" title="Admin">
-            <Shield className="h-4 w-4" />
+          <div
+            className={`mb-3 flex items-center rounded-lg bg-accent/20 text-accent-2 ${
+              showLabels ? "h-8 gap-2 px-2" : "h-8 w-8 justify-center max-lg:h-8 max-lg:w-auto max-lg:gap-2 max-lg:px-2"
+            }`}
+            title="Admin"
+          >
+            <Shield className="h-4 w-4 shrink-0" />
+            <span className={`text-xs font-semibold ${showLabels ? "inline" : "hidden"} max-lg:inline`}>Admin</span>
           </div>
         ) : null}
-        <nav className="flex flex-1 flex-col items-center gap-2 overflow-y-auto">
+        <nav className="flex flex-1 flex-col gap-1 overflow-y-auto">
           {navItems.map((item) => {
             const Icon = item.icon;
             const active =
@@ -87,25 +134,29 @@ export function DashboardNav({ open, onClose }: { open: boolean; onClose: () => 
                 href={item.href}
                 title={item.label}
                 onClick={onClose}
-                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-colors ${
-                  active ? "bg-accent/20 text-accent-2" : "text-muted hover:bg-surface-2 hover:text-white"
-                }`}
+                className={`flex h-10 items-center rounded-xl transition-colors max-lg:gap-3 max-lg:px-3 ${
+                  showLabels ? "gap-3 px-3" : "lg:w-10 lg:justify-center"
+                } ${active ? "bg-accent/20 text-accent-2" : "text-muted hover:bg-surface-2 hover:text-white"}`}
               >
-                <Icon className="h-5 w-5" />
-                <span className="sr-only">{item.label}</span>
+                <Icon className="h-5 w-5 shrink-0" />
+                <span className={`truncate text-sm font-medium ${showLabels ? "inline" : "hidden"} max-lg:inline`}>
+                  {item.label}
+                </span>
               </Link>
             );
           })}
         </nav>
-        <div className="flex flex-col items-center gap-2">
+        <div className={`mt-3 flex flex-col gap-1 ${showLabels ? "" : "lg:items-center"}`}>
           <Link
             href="/contact"
             title="Support"
             onClick={onClose}
-            className="flex h-10 w-10 items-center justify-center rounded-xl text-muted hover:bg-surface-2 hover:text-white"
+            className={`flex h-10 items-center rounded-xl text-muted hover:bg-surface-2 hover:text-white max-lg:gap-3 max-lg:px-3 ${
+              showLabels ? "gap-3 px-3" : "lg:w-10 lg:justify-center"
+            }`}
           >
-            <LifeBuoy className="h-5 w-5" />
-            <span className="sr-only">Support</span>
+            <LifeBuoy className="h-5 w-5 shrink-0" />
+            <span className={`text-sm font-medium ${showLabels ? "inline" : "hidden"} max-lg:inline`}>Support</span>
           </Link>
           <button
             type="button"
@@ -116,12 +167,22 @@ export function DashboardNav({ open, onClose }: { open: boolean; onClose: () => 
               router.push("/auth/login");
               router.refresh();
             }}
-            className="flex h-10 w-10 items-center justify-center rounded-xl text-muted hover:bg-surface-2 hover:text-white"
+            className={`flex h-10 items-center rounded-xl text-muted hover:bg-surface-2 hover:text-white max-lg:gap-3 max-lg:px-3 ${
+              showLabels ? "gap-3 px-3" : "lg:w-10 lg:justify-center"
+            }`}
           >
-            <LogOut className="h-5 w-5" />
-            <span className="sr-only">Sign out</span>
+            <LogOut className="h-5 w-5 shrink-0" />
+            <span className={`text-sm font-medium ${showLabels ? "inline" : "hidden"} max-lg:inline`}>Sign out</span>
           </button>
         </div>
+        <button
+          type="button"
+          aria-label="Resize sidebar"
+          title="Drag to resize, double-click to collapse"
+          className="absolute inset-y-0 right-0 z-10 hidden w-1.5 cursor-col-resize bg-transparent hover:bg-accent/50 lg:block"
+          onPointerDown={startDrag}
+          onDoubleClick={onToggle}
+        />
       </aside>
     </>
   );
