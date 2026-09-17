@@ -2,8 +2,10 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Copy, TrendingUp } from "lucide-react";
 import { money, timeAgo } from "@/lib/format";
+import { useAuth } from "@/components/AuthProvider";
 
 type Investment = {
   id: string;
@@ -68,18 +70,32 @@ function rankLabel(invested: number, balance: number) {
 }
 
 export default function DashboardPage() {
+  const { user: sessionUser, loading: authLoading } = useAuth();
+  const router = useRouter();
   const [data, setData] = useState<DashboardData | null>(null);
   const [coins, setCoins] = useState<Coin[]>([]);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
+    if (authLoading) return;
+    if (sessionUser?.role === "admin") {
+      router.replace("/dashboard/admin");
+    }
+  }, [sessionUser, authLoading, router]);
+
+  useEffect(() => {
+    if (sessionUser?.role === "admin") return;
     fetch("/api/dashboard", { cache: "no-store" })
       .then((r) => r.json())
       .then(setData);
     fetch("/api/prices")
       .then((r) => r.json())
       .then((d) => setCoins((d.coins || []).slice(0, 3)));
-  }, []);
+  }, [sessionUser]);
+
+  if (authLoading || sessionUser?.role === "admin") {
+    return <p className="text-sm text-muted">Loading…</p>;
+  }
 
   if (!data?.user) {
     return (
@@ -277,6 +293,12 @@ export default function DashboardPage() {
         </div>
 
         <div className="space-y-4 lg:col-span-4">
+          <Link
+            href="/dashboard/deposit"
+            className="btn-glow flex h-11 w-full items-center justify-center rounded-full text-sm font-semibold text-white"
+          >
+            Deposit BTC
+          </Link>
           <div className="dash-panel rounded-2xl p-5">
             <div className="flex items-start justify-between">
               <div>

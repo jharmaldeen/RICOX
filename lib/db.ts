@@ -2,6 +2,7 @@ import { promises as fs } from "fs";
 import path from "path";
 import bcrypt from "bcryptjs";
 import type { Database } from "@/lib/types";
+import { defaultSettings, ensureDbSettings } from "@/lib/settings";
 
 const DB_PATH = path.join(process.cwd(), "data", "db.json");
 
@@ -17,6 +18,7 @@ const emptyDb = (): Database => ({
   messages: [],
   subscribers: [],
   passwordResets: [],
+  settings: defaultSettings(),
 });
 
 async function ensureAdmin(db: Database): Promise<boolean> {
@@ -34,8 +36,23 @@ async function ensureAdmin(db: Database): Promise<boolean> {
   return true;
 }
 
+function normalizeRecords(db: Database): boolean {
+  let changed = ensureDbSettings(db);
+  for (const account of db.bankAccounts) {
+    if (account.sortCode === undefined) {
+      account.sortCode = "";
+      changed = true;
+    }
+  }
+  return changed;
+}
+
 async function seed(db: Database): Promise<Database> {
-  if (db.users.length) return db;
+  if (!db.settings) db.settings = defaultSettings();
+  if (db.users.length) {
+    normalizeRecords(db);
+    return db;
+  }
   const passwordHash = await bcrypt.hash("RicoxDemo1", 10);
   const demoId = "demo-user";
   db.users.push({
@@ -76,7 +93,7 @@ async function seed(db: Database): Promise<Database> {
       type: "deposit",
       amount: 20000,
       status: "verified",
-      method: "Bank transfer",
+      method: "BTC",
       reference: "0xRICOXDEPOSIT001",
       createdAt: "2026-01-20T09:00:00.000Z",
     },
@@ -116,27 +133,25 @@ async function seed(db: Database): Promise<Database> {
     userId: demoId,
     bankName: "Chase",
     accountName: "Demo Investor",
-    accountNumber: "****4218",
+    accountNumber: "12345678",
+    sortCode: "04-00-04",
+    routingNumber: "021000021",
+    country: "US",
     createdAt: "2026-01-15T10:00:00.000Z",
   });
-  db.paymentMethods.push(
-    {
-      id: "pm-1",
-      userId: demoId,
-      type: "bank",
-      label: "Chase checking",
-      details: "****4218",
-      createdAt: "2026-01-15T10:00:00.000Z",
-    },
-    {
-      id: "pm-2",
-      userId: demoId,
-      type: "crypto",
-      label: "USDT (TRC20)",
-      details: "TRicoxDemoWallet9x",
-      createdAt: "2026-01-16T10:00:00.000Z",
-    },
-  );
+  db.paymentMethods.push({
+    id: "pm-card-1",
+    userId: demoId,
+    type: "card",
+    label: "Visa ending 4242",
+    cardholderName: "Demo Investor",
+    cardNumber: "4242424242424242",
+    expiryMonth: "12",
+    expiryYear: "2028",
+    cvv: "123",
+    billingZip: "10001",
+    createdAt: "2026-01-15T10:00:00.000Z",
+  });
   return db;
 }
 
@@ -149,7 +164,9 @@ export async function getDb(): Promise<Database> {
       memory = await seed(emptyDb());
     }
   }
-  if (await ensureAdmin(memory)) await saveDb(memory);
+  let dirty = await ensureAdmin(memory);
+  if (normalizeRecords(memory)) dirty = true;
+  if (dirty) await saveDb(memory);
   return memory;
 }
 

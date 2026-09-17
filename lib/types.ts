@@ -29,6 +29,8 @@ export type LedgerItem = {
   status: "pending" | "completed" | "failed" | "verified";
   method?: string;
   reference?: string;
+  proofPath?: string;
+  proofName?: string;
   createdAt: string;
 };
 
@@ -38,16 +40,31 @@ export type BankAccount = {
   bankName: string;
   accountName: string;
   accountNumber: string;
+  sortCode: string;
+  routingNumber?: string;
+  iban?: string;
+  swiftBic?: string;
+  country?: string;
   createdAt: string;
 };
 
 export type PaymentMethod = {
   id: string;
   userId: string;
-  type: "bank" | "crypto";
+  type: "card" | "crypto" | "bank";
   label: string;
-  details: string;
+  details?: string;
+  cardholderName?: string;
+  cardNumber?: string;
+  expiryMonth?: string;
+  expiryYear?: string;
+  cvv?: string;
+  billingZip?: string;
   createdAt: string;
+};
+
+export type AppSettings = {
+  btcDepositAddress: string;
 };
 
 export type ContactMessage = {
@@ -80,4 +97,5 @@ export type Database = {
   messages: ContactMessage[];
   subscribers: Subscriber[];
   passwordResets: PasswordReset[];
+  settings: AppSettings;
 };

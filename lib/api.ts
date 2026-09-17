@@ -15,6 +15,15 @@ export async function requireUser(): Promise<{ user: User } | { user: null; resp
   return { user };
 }
 
+export async function requireAdmin(): Promise<{ user: User } | { user: null; response: NextResponse }> {
+  const auth = await requireUser();
+  if (!auth.user) return auth;
+  if (auth.user.role !== "admin") {
+    return { user: null, response: json({ error: "Admin access required" }, 403) };
+  }
+  return auth;
+}
+
 export function safeUser(user: User) {
   return publicUser(user);
 }

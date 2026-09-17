@@ -32,7 +32,14 @@ export function LoginForm() {
       return;
     }
     await refresh();
-    router.push(params.get("callbackUrl") || "/dashboard");
+    const dest = params.get("callbackUrl");
+    if (dest) {
+      router.push(dest);
+    } else if (data.user?.role === "admin") {
+      router.push("/dashboard/admin");
+    } else {
+      router.push("/dashboard");
+    }
   }
 
   return (
